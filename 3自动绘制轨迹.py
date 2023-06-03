@@ -42,14 +42,18 @@ for _,point in mouse_check:
 
 line=0
 times=0
+  
 def after_1s():
     global line,times,track
+    
     if line==len(track):
         root.destroy()
+    
     point=track[line][times][1]
     canvas.create_oval(point[0],point[1],point[0]+10,point[1]+10, fill='black',tags='point')
     root.after(1,after_1s)
     times+=1
+    #print(times,len(track[line]))
     if times==len(track[line]):
         line+=1
         times=0

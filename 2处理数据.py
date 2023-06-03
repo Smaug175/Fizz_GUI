@@ -21,20 +21,25 @@ def save_track(mouse_check_path,mouse_move_path,track_path):
     '''
     divide_index=[]#记录鼠标移动和鼠标点击的分界点
     with open(mouse_check_path,'rb') as file:
-        check_datas=pickle.load(file)
+        mouse_check=pickle.load(file)
     with open(mouse_move_path,'rb') as file:
-        move_datas=pickle.load(file)
-
-    for i in range(len(check_datas)):
-        for j in range(len(move_datas)):
-            if check_datas[i][0]<move_datas[j][0]:
+        mouse_move=pickle.load(file)
+    
+    print('点击点的个数为：',len(mouse_check))
+    for i in range(len(mouse_check)):
+        for j in range(len(mouse_move)):
+            if mouse_check[i][0]<mouse_move[j][0]:
                 divide_index.append(j)
                 break
     #得到切片的索引
     track=[]
-    for i in range(len(divide_index)-1):
-        track.append(move_datas[divide_index[i]:divide_index[i+1]])
-   
+    for i in range(0,len(divide_index)-1,2):
+        track.append(mouse_move[divide_index[i]:divide_index[i+1]])
+    
+    print('总的轨迹长度为：',len(mouse_move))
+    
+    for i in range(len(track)):
+        print(len(track[i]))
     with open(track_path, "wb") as file:
         pickle.dump(track, file)
     #print(track)
