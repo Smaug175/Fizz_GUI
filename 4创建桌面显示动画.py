@@ -1,11 +1,13 @@
 from ctypes import windll
 windll.shcore.SetProcessDpiAwareness(1)
 
-import tkinter as tk
+from tkinter import *
 import tkinter.font as tkFont
 import time
 import sys
 import pickle
+from tkinter import messagebox
+import tkinter.ttk as ttk
 
 def save_track(mouse_check_path,mouse_move_path,track_path):
     '''
@@ -56,35 +58,68 @@ class App:
         alignstr = '%dx%d+%d+%d' % (self.width, self.height, (screenwidth - self.width) / 2, (screenheight - self.height) / 2)
         self.root.geometry(alignstr)
         self.root.resizable(width=False, height=False)
-
-        begin_game_btn=tk.Button(self.root)
-        begin_game_btn["bg"] = "#f0f0f0"
-        ft = tkFont.Font(family='Times',size=10)
-        begin_game_btn["font"] = ft
-        begin_game_btn["fg"] = "#000000"
-        begin_game_btn["justify"] = "center"
-        begin_game_btn["text"] = "开始游戏"
-        begin_game_btn.place(x=0,y=0,width=80,height=25)
-        begin_game_btn["command"] = self.begin_game
-
-        show_trace_btn=tk.Button(self.root)
-        show_trace_btn["bg"] = "#f0f0f0"
-        ft = tkFont.Font(family='Times',size=10)
-        show_trace_btn["font"] = ft
-        show_trace_btn["fg"] = "#000000"
-        show_trace_btn["justify"] = "center"
-        show_trace_btn["text"] = "显示动画"
-        show_trace_btn.place(x=85,y=0,width=80,height=25)
-        show_trace_btn["command"] = self.show_trace
         
+        #添加菜单栏目
+        menubar=Menu(root,font=("Microsoft YaHei",12,"normal"))
+        filemenu=Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="文件", menu=filemenu)#添加子菜单
+
+        filemenu.add_command(label="New", command=self.newfile)
+        filemenu.add_command(label="Open", command=self.openfile)
+        filemenu.add_separator()#添加分割线
+        filemenu.add_command(label="Save", command=self.savefile)
+        filemenu.add_command(label="Save As", command=self.saveasfile)
+        filemenu.add_separator()#添加分割线
+        filemenu.add_command(label='exit', command=self.root.destroy)
+
+        helpmenu=Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=helpmenu)#添加子菜单
+        helpmenu.add_command(label="About", command=self.about)
+
+        self.root.config(menu=menubar)#显示菜单
+
+        
+        toolbar=Frame(self.root,relief=RAISED,borderwidth=1)
+        toolbar.pack(side=TOP,fill=X,padx=5,pady=5)
+        
+        
+        ft = tkFont.Font(family='Times',size=10)
+        begin_game_btn=Button(toolbar,bg="#f0f0f0",font=ft,fg="#000000",justify="center",text="开始游戏",command=self.begin_game)    
+        begin_game_btn.pack(pady=5,side=LEFT)
+        show_trace_btn=Button(toolbar,bg="#f0f0f0",font=ft,fg="#000000",justify="center",text="显示动画",command=self.show_trace)
+        show_trace_btn["bg"] = "#f0f0f0"
+        show_trace_btn.pack(pady=5,side=LEFT)
+        
+        
+        
+        notebook=ttk.Notebook(self.root)
+        notebook.pack(fill=BOTH,expand=YES,padx=10,pady=10)
         # 创建画布
-        self.canvas = tk.Canvas(self.root,width=self.width, height=self.height)
+        canvas_frame1=Frame()
+        self.canvas = Canvas(canvas_frame1,width=self.width, height=self.height,bg='white')
         # 将画布置于主窗口
-        self.canvas.place(x=0, y=25)
+        self.canvas.pack(pady=5,side=LEFT,fill=BOTH,expand=YES)
+        
+        notebook.add(canvas_frame1,text='轨迹动画')
+        
+        notebook.add(Frame(),text='轨迹分析')
+        
+    def newfile(self):
+        messagebox.showinfo("New File", "New File")
+    def openfile(self):
+        messagebox.showinfo("Open File", "Open File")
+    def savefile(self):
+        messagebox.showinfo("Save File", "Save File")
+    def saveasfile(self):
+        messagebox.showinfo("Save As File", "Save As File") 
+
+    def about(self):
+        messagebox.showinfo("About", "构建菲兹定律的GUI界面")
 
     def begin_game(self):
         
-        self.geme_window = tk.Toplevel(self.root)
+        
+        self.geme_window = Toplevel(self.root)
         self.geme_window.focus_set()
         # 获取屏幕尺寸
         screen_width = self.geme_window.winfo_screenwidth()
@@ -100,7 +135,7 @@ class App:
         self.inf['W']=W
         
         # 创建画布
-        self.game_canvas = tk.Canvas(self.geme_window, width=screen_width, height=screen_height)
+        self.game_canvas = Canvas(self.geme_window, width=screen_width, height=screen_height)
         # 将画布置于主窗口
         self.game_canvas.pack()
         self.geme_window.attributes('-fullscreen', True)
@@ -181,7 +216,7 @@ class App:
             else:
                 pass
             #是否结束测试
-            if self.show_times==3:
+            if self.show_times==10:
                     save_esc(1)
             self.geme_window.after(1000, create_cirs)
             
@@ -209,6 +244,8 @@ class App:
 
 
     def show_trace(self):
+        self.canvas.delete('all')
+        
         mouse_check_path=sys.path[0]+'\data\D=2000_W=100_mouse_check.bin'
         mouse_move_path=sys.path[0]+'\data\D=2000_W=100_mouse_move.bin'
         information_path=sys.path[0]+'\data\D=2000_W=100_information.bin'
@@ -227,8 +264,8 @@ class App:
         screen_width=inf['screen_width']
         screen_height=inf['screen_height']
         
-        k_x=self.width/screen_width
-        k_y=self.height/screen_height
+        k_x=self.canvas.winfo_width()/screen_width
+        k_y=self.canvas.winfo_height()/screen_height
         
         cir1=self.canvas.create_oval(inf['cir1'][0]*k_x,inf['cir1'][1]*k_y,inf['cir1'][2]*k_x,inf['cir1'][3]*k_y,outline='red',tags='cir1')
         cir2=self.canvas.create_oval(inf['cir2'][0]*k_x,inf['cir2'][1]*k_y,inf['cir2'][2]*k_x,inf['cir2'][3]*k_y,outline='blue',tags='cir2')
@@ -238,24 +275,26 @@ class App:
 
         self.line=0
         self.times=0
-        
+        colors=('blue','red','green','yellow','black','gray','pink','purple','orange','brown','cyan','magenta','tan','olive','maroon','navy','aquamarine','turquoise','silver','lime','teal','indigo','violet','pink','wheat','thistle','plum','orchid','moccasin','mistyrose','linen','lavender','ivory','honeydew','hotpink','gold','ghostwhite','gainsboro','floralwhite','firebrick','darkviolet','darkturquoise','darkslategray','darkslateblue','darkseagreen','darkred','darkorchid','darkorange','darkolivegreen','darkmagenta','darkkhaki','darkgreen','darkgray','darkgoldenrod','darkcyan','darkblue','crimson','cornsilk','chocolate','chartreuse','burlywood','blueviolet','blanchedalmond','bisque','beige','azure','antiquewhite','aliceblue')
         def after_1s():         
             if self.line==len(track):
-                self.canvas.delete('all')
+                #self.canvas.delete('all')
+                self.line=0
+                return 
             point=track[self.line][self.times][1]
-            self.canvas.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+10)*k_x,(point[1]+10)*k_y, fill='black',tags='point')
+            self.canvas.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+10)*k_x,(point[1]+10)*k_y, fill=colors[self.line],tags='point')
             self.root.after(1,after_1s)
             self.times+=1
             #print(times,len(track[line]))
             if self.times==len(track[self.line]):
                 self.line+=1
                 self.times=0
-                self.canvas.delete('point')
+                #self.canvas.delete('point')
         after_1s()
               
         self.root.bind('1', lambda event:self.canvas.delete('all'))
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = Tk()
     app = App(root)
     root.mainloop()
