@@ -148,9 +148,10 @@ class App:
         notebook.pack(fill=BOTH,expand=YES,padx=5,pady=0)
         # 创建画布
         canvas_frame1=Frame()
-        self.canvas = Canvas(canvas_frame1,width=self.width, height=self.height,bg='white')
+        self.canvas_1 = Canvas(canvas_frame1,width=self.width, height=self.height,bg='white')
         # 将画布置于主窗口
-        self.canvas.pack(pady=5,side=LEFT,fill=BOTH,expand=YES)
+        self.canvas_1.configure(cursor="crosshair")
+        self.canvas_1.pack(pady=5,side=LEFT,fill=BOTH,expand=YES)
         
         notebook.add(canvas_frame1,text='轨迹动画')
         
@@ -240,7 +241,7 @@ class App:
         # 将画布置于主窗口
         self.game_canvas.pack()
         self.geme_window.attributes('-fullscreen', True)
-        
+        self.game_canvas.configure(cursor="crosshair")
         
         #绘制目标点
         x1=(screen_width-D-W)/2
@@ -304,7 +305,29 @@ class App:
         record_mouse_position()
 
     def show_trace(self):
-        self.canvas.delete('all')
+        def on_scale(event):
+            delta = event.delta
+            scale_factor = 1.1 if delta > 0 else 0.9
+            self.canvas_1.scale("all", event.x, event.y, scale_factor, scale_factor)
+
+        def on_mouse_press(event):
+            # 记录鼠标按下时的初始位置
+            self.canvas_1.start_x = event.x
+            self.canvas_1.start_y = event.y
+
+        def on_mouse_drag(event):
+            # 计算鼠标移动的距离
+            dx = event.x - self.canvas_1.start_x
+            dy = event.y - self.canvas_1.start_y
+
+            # 移动Canvas上的元素
+            self.canvas_1.move("all", dx, dy)
+
+            # 更新初始位置
+            self.canvas_1.start_x = event.x
+            self.canvas_1.start_y = event.y
+        
+        self.canvas_1.delete('all')
         try:
             self.mouse_move,self.mouse_check,self.track,self.inf=self.read_data(self.D.get(),self.W.get())
         except:
@@ -322,14 +345,14 @@ class App:
         screen_width=inf['screen_width']
         screen_height=inf['screen_height']
         
-        k_x=self.canvas.winfo_width()/screen_width
-        k_y=self.canvas.winfo_height()/screen_height
+        k_x=self.canvas_1.winfo_width()/screen_width
+        k_y=self.canvas_1.winfo_height()/screen_height
         
-        cir1=self.canvas.create_oval(inf['cir1'][0]*k_x,inf['cir1'][1]*k_y,inf['cir1'][2]*k_x,inf['cir1'][3]*k_y,outline='red',tags='cir1')
-        cir2=self.canvas.create_oval(inf['cir2'][0]*k_x,inf['cir2'][1]*k_y,inf['cir2'][2]*k_x,inf['cir2'][3]*k_y,outline='blue',tags='cir2')
+        cir1=self.canvas_1.create_oval(inf['cir1'][0]*k_x,inf['cir1'][1]*k_y,inf['cir1'][2]*k_x,inf['cir1'][3]*k_y,outline='red',tags='cir1')
+        cir2=self.canvas_1.create_oval(inf['cir2'][0]*k_x,inf['cir2'][1]*k_y,inf['cir2'][2]*k_x,inf['cir2'][3]*k_y,outline='blue',tags='cir2')
 
         for _,point in mouse_check:
-            self.canvas.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+10)*k_x,(point[1]+10)*k_y,outline='black')
+            self.canvas_1.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+10)*k_x,(point[1]+10)*k_y,outline='black')
 
         self.line=0
         self.times=0
@@ -340,7 +363,7 @@ class App:
                 self.line=0
                 return 
             point=track[self.line][self.times][1]
-            self.canvas.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+5)*k_x,(point[1]+5)*k_y, fill=colors[self.line],tags='point',)
+            self.canvas_1.create_oval(point[0]*k_x,point[1]*k_y,(point[0]+5)*k_x,(point[1]+5)*k_y, fill=colors[self.line],tags='point',)
             self.root.after(1,after_1s)
             self.times+=1
             #print(times,len(track[line]))
@@ -349,8 +372,11 @@ class App:
                 self.times=0
                 #self.canvas.delete('point')
         after_1s()
-              
-        self.root.bind('1', lambda event:self.canvas.delete('all'))
+        
+        self.canvas_1.bind("<ButtonPress-1>", on_mouse_press)
+        self.canvas_1.bind("<B1-Motion>", on_mouse_drag)
+        self.canvas_1.bind("<MouseWheel>", on_scale)
+        self.root.bind('1', lambda event:self.canvas_1.delete('all'))
 
 if __name__ == "__main__":
     root = Tk()
