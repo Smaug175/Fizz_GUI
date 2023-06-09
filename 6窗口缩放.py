@@ -111,7 +111,7 @@ class App:
         self.Times=StringVar()#次数
         Times_cb=ttk.Combobox(toolbar,textvariable=self.Times,font=ft,width=4)
         list_Times=[]
-        for i in range(2,11,1):
+        for i in range(2,21,1):
             list_Times.append(i)
         Times_cb['value']=list_Times
         Times_cb.current(0)#设置默认值
