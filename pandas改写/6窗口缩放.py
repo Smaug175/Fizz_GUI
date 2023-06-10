@@ -221,11 +221,11 @@ class App:
             
             messagebox.showinfo("Save File", "数据保存成功")
               
-        self.geme_window = Toplevel(self.root)
-        self.geme_window.focus_set()
+        self.game_window = Toplevel(self.root)
+        self.game_window.focus_set()
         # 获取屏幕尺寸
-        screen_width = self.geme_window.winfo_screenwidth()
-        screen_height = self.geme_window.winfo_screenheight()
+        screen_width = self.game_window.winfo_screenwidth()
+        screen_height = self.game_window.winfo_screenheight()
         
         self.inf={}
         self.inf['screen_width']=screen_width
@@ -237,10 +237,10 @@ class App:
         self.inf['W']=W
         
         # 创建画布
-        self.game_canvas = Canvas(self.geme_window, width=screen_width, height=screen_height)
+        self.game_canvas = Canvas(self.game_window, width=screen_width, height=screen_height)
         # 将画布置于主窗口
         self.game_canvas.pack()
-        self.geme_window.attributes('-fullscreen', True)
+        self.game_window.attributes('-fullscreen', True)
         self.game_canvas.configure(cursor="crosshair")
         
         #绘制目标点
@@ -276,30 +276,42 @@ class App:
             #是否结束测试
             if self.show_times==int(self.Times.get()):
                     save_esc()
-                    self.geme_window.destroy()
+                    self.game_window.destroy()
                     return
-            self.geme_window.after(1000, create_cirs)
+            self.game_window.after(1000, create_cirs)
             
         create_cirs()
+        
+        def on_mouse_move(event):
+            x = self.game_window.winfo_pointerx()  # 获取鼠标当前的x坐标
+            y = self.game_window.winfo_pointery()  # 获取鼠标当前的y坐标
+            current_time = time.time()  # 获取当前时间
+            self.mouse_move.append((current_time,x,y))
+        
+        self.game_window.bind("<Motion>", on_mouse_move)
        
         def exit_game(event):
             save_esc()
-            self.geme_window.destroy()
+            self.game_window.destroy()
             return
         
         #按1退出
-        self.geme_window.bind('1', exit_game)
+        self.game_window.bind('1', exit_game)
 
         # 绑定鼠标事件
         self.mouse_move=[]
         self.mouse_check=[]
+           
         def record_mouse_position():
-            x = self.geme_window.winfo_pointerx()  # 获取鼠标当前的x坐标
-            y = self.geme_window.winfo_pointery()  # 获取鼠标当前的y坐标
+            x = self.game_window.winfo_pointerx()  # 获取鼠标当前的x坐标
+            y = self.game_window.winfo_pointery()  # 获取鼠标当前的y坐标
             current_time = time.time()  # 获取当前时间
             #print(f"Mouse position: ({x}, {y}), time: {current_time}")
             self.mouse_move.append((current_time,x,y))
-            self.geme_window.after(1, record_mouse_position)  # 每隔一秒调用一次函数
+            #time.sleep(0.0001)
+            #record_mouse_position()
+            self.game_window.after(1, record_mouse_position)  # 每隔一秒调用一次函数
+            #print(time.time())
             #canvas.create_oval(x,y,x+10,y+10,fill='black')
 
         record_mouse_position()
