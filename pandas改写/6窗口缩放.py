@@ -288,7 +288,7 @@ class App:
             current_time = time.time()  # 获取当前时间
             self.mouse_move.append((current_time,x,y))
         
-        self.game_window.bind("<Motion>", on_mouse_move)
+        #self.game_window.bind("<Motion>", on_mouse_move)
        
         def exit_game(event):
             save_esc()
