@@ -1,0 +1,4 @@
+number,time,distance,ball_radius,speed,distance_after_moving
+1,0.87,400.0,30,3,244.0
+2,1.211,400.0,30,3,181.0
+3,1.282,400.0,30,3,169.0
