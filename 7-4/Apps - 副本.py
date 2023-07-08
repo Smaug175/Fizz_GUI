@@ -37,10 +37,10 @@ class MouseTracker:
             x1, y1 = pyautogui.position()
             x2, y2 = win32api.GetCursorPos()
             
-            x4, y4 = pyautogui.position()
-            x3, y3 = win32api.GetCursorPos()
+            #x4, y4 = pyautogui.position()
+            #x3, y3 = win32api.GetCursorPos()
             #print(f"Mouse position: ({x}, {y})")
-            self.track.append((time.time(),(x1+x2+x3+x4)/4,(y1+y2+y3+y4)/4))
+            self.track.append((time.time(),(x1+x2)/2,(y1+y2)/2))
     
     def get_track(self):
         return self.track
@@ -255,18 +255,18 @@ class App:
         self.cir=0#记录目标点是否已经出现，如果为0，说明要重新生成目标点
         self.show_times=-1#记录目标点出现的次数，如果为3，说明测试结束
         
-        tracker = MouseTracker(self.game_canvas)
-        
+        tracker1 = MouseTracker(self.game_canvas)
+
         self.mouse_move=[]
         
         #删除被点击的控件
         def delete_widget(event):
             
-            if tracker.is_tracking:
-                self.mouse_move.append(tracker.get_track())
-                tracker.stop_tracking()
+            if tracker1.is_tracking:
+                self.mouse_move.append(tracker1.get_track())
+                tracker1.stop_tracking()
             else:
-                tracker.start_tracking()
+                tracker1.start_tracking()
                 
             item_id = self.game_canvas.find_closest(event.x, event.y)[0]  # 获取与鼠标事件位置最接近的项的ID
             self.cir-=1
