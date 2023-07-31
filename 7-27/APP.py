@@ -14,6 +14,7 @@ import threading
 import win32api
 import pyautogui
 import random
+import os
 
 class MouseTracker:
     def __init__(self, canvas):
@@ -51,6 +52,10 @@ class App:
 
     #todo->    
     def __init__(self, root):
+        folder_path=sys.path[0]+'\data'
+        if not os.path.exists(folder_path):
+            os.mkdir(folder_path)
+            print(f"Folder '{folder_path}' created successfully.")
         #setting title
         self.root=root
         self.root.title("undefined")
