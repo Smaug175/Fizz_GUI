@@ -15,6 +15,10 @@ import win32api
 import pyautogui
 import random
 import os
+import zmq
+import msgpack as serializer
+from time import sleep, time
+
 
 class MouseTracker:
     def __init__(self, canvas):
@@ -33,7 +37,6 @@ class MouseTracker:
     def stop_tracking(self):
         self.is_tracking = False
         #print(len(self.track))
-        #print('t3:',time.time())
 
     def track_mouse(self):
         while self.is_tracking:
@@ -43,7 +46,7 @@ class MouseTracker:
             #x4, y4 = pyautogui.position()
             #x3, y3 = win32api.GetCursorPos()
             #print(f"Mouse position: ({x}, {y})")
-            self.track.append((time.time(),(x1+x2)/2,(y1+y2)/2))
+            self.track.append((time(),(x1+x2)/2,(y1+y2)/2))
     
     def get_track(self):
         return self.track
@@ -241,7 +244,7 @@ class App:
         for i in range(4):
             for j in range(4):
                 D_W_mix.append((d2-i*n,w1+j*m))
-        #print(D_W_mix)
+        print(D_W_mix)
         
         
         self.cir=0#记录目标点是否已经出现，如果为0，说明要重新生成目标点
@@ -254,16 +257,32 @@ class App:
         
         #删除被点击的控件
         def delete_widget(event):
-            #global T
+            
             if tracker1.is_tracking:
+                
+                
+                socket.send_string("r")
+                print(socket.recv_string())
+                
                 self.mouse_move.append(tracker1.get_track())
                 tracker1.stop_tracking()
-                #print('t1:',time.time())
-                #print('time:',time.time()-T)
             else:
+                # Measure round trip delay
+                t = time()
+                socket.send_string("t")
+                print(socket.recv_string())
+                print("Round trip command delay:", time() - t)
+
+                # set current Pupil time to 0.0
+                socket.send_string("T 0.0")
+                print(socket.recv_string())
+                
+                socket.send_string("R")
+                print(socket.recv_string())
+                
                 tracker1.start_tracking()
-                #print('t2:',time.time())
-                #T=time.time()
+                
+                
                 
             item_id = self.game_canvas.find_closest(event.x, event.y)[0]  # 获取与鼠标事件位置最接近的项的ID
             self.cir-=1
@@ -313,6 +332,11 @@ class App:
 
 
 if __name__ == "__main__":
+    # Setup zmq context and remote helper
+    ctx = zmq.Context()
+    socket = zmq.Socket(ctx, zmq.REQ)
+    socket.connect("tcp://127.0.0.1:50020")
+    
     root = Tk()
     app = App(root)
     root.mainloop()
