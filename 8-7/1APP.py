@@ -238,8 +238,8 @@ class App:
         m=(w2-w1)/3
         
         D_W_mix=[(0,0)]
-        for i in range(4):
-            for j in range(4):
+        for i in range(3):
+            for j in range(3):
                 D_W_mix.append((d2-i*n,w1+j*m))
         #print(D_W_mix)
         
