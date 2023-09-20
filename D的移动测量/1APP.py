@@ -207,7 +207,7 @@ class App:
             mouse_move_name = 'D='+str(self.d1.get())+'-'+str(self.d2.get())+'_W='+str(self.w1.get())+'-'+str(self.w2.get())+".bin"  # 文件路径和名称
             mouse_move_path=sys.path[0]+'\data\\'+mouse_move_name
             # 打开文件，以写入模式
-            #self.mouse_move =clean(self.mouse_move)
+            self.mouse_move =clean(self.mouse_move)
             with open(mouse_move_path, "wb") as file:
                 pickle.dump(self.mouse_move, file)
             
